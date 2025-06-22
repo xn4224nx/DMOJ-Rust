@@ -1,0 +1,26 @@
+/*
+ * Tests for main.rs
+ */
+
+use assert_cmd::Command;
+
+#[test]
+fn exp_01() {
+    let mut cmd = Command::cargo_bin("ecoo12r1p2").unwrap();
+    let assert = cmd
+        .write_stdin(concat!(
+            "AGATTATATAATGATAGGATTTAGATTGACCCGTCATGCAAGTCCATGCATGACAGC\n",
+            "AGTCTTCAAGGGGATTCCCAGGTATATAATGCAGATCGCGACGAAATATCGGGCGGGATCCATACCGACCCAGCCGCCCGA\n",
+            "TATAATGGGGGAGAGACCGAGTGTTTAAGTCCCGAGGGATCGGGAGTGAGATTGAGGGAATTCCGGGAATCTCACT\n",
+            "AGATTATATAATGATAGGATTTAGATTGACCCGTCATGCAAGTCCATGCATGACAGC\n",
+            "AGTCTTCAAGGGGATTCCCAGGTATATAATGCAGATCGCGACGAAATATCGGGCGGGATCCATACCGACCCAGCCGCCCGA\n",
+        ))
+        .assert();
+    assert.success().stdout(concat!(
+        "1: CCUAAAUCUAACUGGG\n",
+        "2: UAGCGCUGCUUUAU\n",
+        "3: CUCUCUGGCUCACAAAUUC\n",
+        "4: CCUAAAUCUAACUGGG\n",
+        "5: UAGCGCUGCUUUAU\n",
+    ));
+}
