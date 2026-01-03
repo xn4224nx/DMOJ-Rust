@@ -3,6 +3,8 @@
  * https://dmoj.ca/problem/gcj22r1bb
  */
 
+use std::collections::HashMap;
+
 fn main() {
     let mut buffer = String::new();
 
@@ -44,45 +46,34 @@ fn main() {
             }
             pressures.push((cust_min_pres, cust_max_pres))
         }
-
-        /* Calculate the internal pressure changes */
-        let internal_changes = pressures.iter().map(|(x, y)| x.abs_diff(*y)).sum::<u64>();
-
-        /* The pump starts at zero pressure and zero buttons pressed. */
-        let mut paths = vec![(0, 0)];
-
-        for cust_idx in 0..prob_dims[0] {
-            let mut new_paths = Vec::with_capacity(paths.len() * 2);
-
-            /* Explore the posibility of either path being chosen. */
-            for prev_path_idx in 0..paths.len() {
-                /* Continue at the min pressure. */
-                new_paths.push((
-                    paths[prev_path_idx].0 + pressures[cust_idx].0.abs_diff(paths[prev_path_idx].1),
-                    pressures[cust_idx].1,
-                ));
-
-                /* Continue at the max pressure. */
-                new_paths.push((
-                    paths[prev_path_idx].0 + pressures[cust_idx].1.abs_diff(paths[prev_path_idx].1),
-                    pressures[cust_idx].0,
-                ));
-            }
-
-            /* Prune some pathways to get a lower the memory footprint. */
-            if cust_idx % 5 == 0 {
-                new_paths.sort();
-                new_paths.resize(new_paths.len() / 2, (0, 0))
-            }
-
-            /* Overwrite the old cycles values. */
-            paths = new_paths;
-        }
-
-        println!(
-            "Case #{}: {}",
-            case_idx + 1,
-            internal_changes + paths.into_iter().map(|x| x.0).min().unwrap()
-        );
+        println!("Case #{}: {}", case_idx + 1, comparison_solver(&pressures));
     }
+}
+
+fn comparison_solver(pressures: &Vec<(u64, u64)>) -> u64 {
+    let mut curr_preses = HashMap::from([(0, 0)]);
+
+    for (min_pres, max_pres) in pressures.iter() {
+        let mut new_preses = HashMap::new();
+
+        for (path_pres, path_cost) in curr_preses.drain() {
+            new_preses.insert(
+                *min_pres,
+                std::cmp::min(
+                    new_preses.get(&min_pres).cloned().unwrap_or(u64::MAX),
+                    path_cost + max_pres.abs_diff(path_pres) + max_pres.abs_diff(*min_pres),
+                ),
+            );
+
+            new_preses.insert(
+                *max_pres,
+                std::cmp::min(
+                    new_preses.get(&max_pres).cloned().unwrap_or(u64::MAX),
+                    path_cost + min_pres.abs_diff(path_pres) + min_pres.abs_diff(*max_pres),
+                ),
+            );
+        }
+        curr_preses = new_preses;
+    }
+    return curr_preses.into_values().min().unwrap();
 }
