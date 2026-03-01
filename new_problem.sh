@@ -32,6 +32,7 @@ echo """/*
  * Tests for main.rs
  */
 
+#![allow(deprecated)]
 use assert_cmd::{Command, pkg_name};
 
 #[test]
