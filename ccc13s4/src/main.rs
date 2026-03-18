@@ -15,7 +15,7 @@ fn main() {
         .collect::<Vec<usize>>();
 
     /* Keep a record of the edges */
-    let mut more_than = vec![vec![false; metadata[0]]; metadata[0]];
+    let mut more_than = vec![Vec::new(); metadata[0]];
 
     /* Read the edge data for the graph. */
     for _ in 0..metadata[1] {
@@ -26,7 +26,7 @@ fn main() {
             .split_whitespace()
             .map(|x| x.parse::<usize>().unwrap() - 1)
             .collect::<Vec<usize>>();
-        more_than[edge[0]][edge[1]] = true;
+        more_than[edge[0]].push(edge[1]);
     }
 
     /* Read the comparison nodes. */
@@ -52,7 +52,7 @@ fn main() {
 }
 
 /// With a network of unidirecional edges determined if two nodes are connected?
-fn are_nodes_conn(start_node: usize, end_node: usize, uni_edges: &Vec<Vec<bool>>) -> bool {
+fn are_nodes_conn(start_node: usize, end_node: usize, uni_edges: &Vec<Vec<usize>>) -> bool {
     let mut curr_nodes = vec![start_node];
     let mut seen_nodes = vec![false; uni_edges.len()];
     seen_nodes[start_node] = true;
@@ -62,13 +62,13 @@ fn are_nodes_conn(start_node: usize, end_node: usize, uni_edges: &Vec<Vec<bool>>
 
         /* Collect the unvisited nodes connected to each current node. */
         for c_node in curr_nodes.drain(..) {
-            for n_idx in 0..uni_edges.len() {
-                if !seen_nodes[n_idx] && uni_edges[c_node][n_idx] {
-                    seen_nodes[n_idx] = true;
-                    nxt_nodes.push(n_idx);
+            for n_node in uni_edges[c_node].iter() {
+                if !seen_nodes[*n_node] {
+                    seen_nodes[*n_node] = true;
+                    nxt_nodes.push(*n_node);
 
                     /* Check to see if the destination has been reached. */
-                    if n_idx == end_node {
+                    if *n_node == end_node {
                         return true;
                     }
                 }
